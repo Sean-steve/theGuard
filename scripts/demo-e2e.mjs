@@ -29,7 +29,13 @@ const commonEnv = {
   GUARD_ADMIN_TOKEN: admin, GUARD_CONNECTOR_SECRET: connector,
   GUARD_DRY_RUN: "NO", GUARD_VERIFIED_EVENTS_ENABLED: "YES"
 };
-const sql = postgres(process.env.DATABASE_URL, { max: 1 });
+const sql = postgres(process.env.DATABASE_URL, { max: 1, connect_timeout: 4, idle_timeout: 6 });
+const watchdog = setTimeout(() => {
+  console.error("Phase 3 E2E exceeded 90 seconds — refusing to leave synthetic CI processes running");
+  for (const { child } of children) child.kill("SIGKILL");
+  process.exit(1);
+}, 90_000);
+watchdog.unref();
 const children = [];
 async function waitHealth(base) {
   for (let attempt = 0; attempt < 70; attempt++) {
@@ -53,7 +59,7 @@ function spawnServer(path, env) {
 }
 async function api(path, method = "GET", payload) {
   const response = await fetch(guardBase + path, {
-    method, headers: {
+    method, signal: AbortSignal.timeout(5000), headers: {
       "Authorization": "Bearer " + admin,
       ...(payload === undefined ? {} : { "Content-Type": "application/json" })
     }, ...(payload === undefined ? {} : { body: JSON.stringify(payload) })
@@ -62,7 +68,7 @@ async function api(path, method = "GET", payload) {
   return { status: response.status, data };
 }
 async function demo(path) {
-  const response = await fetch(siteBase + path, { cache: "no-store" });
+  const response = await fetch(siteBase + path, { cache: "no-store", signal: AbortSignal.timeout(5000) });
   const text = await response.text();
   return { status: response.status, body: text };
 }
@@ -75,7 +81,7 @@ async function event(projectId, invoiceId, type, sequence, balanceMinor, dueAt) 
   });
   const timestamp = String(Math.floor(Date.now() / 1000));
   const response = await fetch(guardBase + "/webhooks/financial", {
-    method: "POST",
+    method: "POST", signal: AbortSignal.timeout(5000),
     headers: {
       "Content-Type": "application/json",
       "x-guard-event-id": "synthetic-ci-" + randomUUID(),
@@ -112,6 +118,7 @@ async function assertContent(expectedAvailable) {
 }
 let projectId, invoiceId;
 try {
+  await sql.unsafe("SET statement_timeout = 5000");
   const g = spawnServer("src/server.mjs", commonEnv);
   const health = await waitHealth(guardBase);
   assert.equal(health.dry_run, false);
@@ -229,4 +236,5 @@ try {
     try { child.kill("SIGTERM"); } catch { /* already stopped */ }
   }
   await sql.end({ timeout: 5 });
+  clearTimeout(watchdog);
 }
