@@ -58,7 +58,7 @@ Run `npm test` and `npm run check` for unit and syntax validation. CI also runs 
 
 ## Server-side SDK
 
-Use §sdk/node.mjs§ from an Nflake-controlled backend only. Construct §new GuardClient({endpoint,projectId,projectKey})§ with a server secret, then call §await client.decision()§. The SDK validates project IDs, response expiry and permitted restriction scopes; network failures return UNKNOWN / restrict=false (no outage-caused suspension). Static GitHub Pages and fully transferred client source code cannot safely enforce secret-backed licensing.
+Use `sdk/node.mjs` from an Nflake-controlled backend only. Construct `new GuardClient({endpoint,projectId,projectKey})` with a server secret, then call `await client.decision()`. The SDK validates project IDs, response expiry and permitted restriction scopes; network failures return UNKNOWN / restrict=false (no outage-caused suspension). Static GitHub Pages and fully transferred client source code cannot safely enforce secret-backed licensing.
 
 ## Restrictions and safety
 
