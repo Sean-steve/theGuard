@@ -44,6 +44,8 @@ Amount is an integer in **minor currency units**, e.g. KES cents. If invoices st
 - invoice.disputed: automatic operator hold.
 - invoice.dispute_resolved: records the event ONLY; an administrator must explicitly release the hold.
 
+**Verified events additionally require sequence:** a positive, strictly increasing integer per Guard project/invoice mapping. Old or out-of-order verified balances are rejected (409), preventing an older overdue event from reversing a newer settlement. Sandbox events do not establish an authoritative sequence.
+
 source=sandbox or source=verified. Verified events are rejected by default until the environment gate is explicitly enabled. The Guard receiver's signature validation verifies the sender, NOT that the M-Pesa provider has independently settled funds. Production verification must happen before signing.
 
 ## Licence transition
