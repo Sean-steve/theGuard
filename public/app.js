@@ -96,6 +96,7 @@ function openDetail(id) {
   byId("detailReason").textContent = p.license.reason;
   const facts = byId("detailFacts");
   facts.replaceChildren();
+  addFact(facts, "Project UUID — use in demo/.env", p.id);
   addFact(facts, "Invoice reference", p.external_invoice_id);
   addFact(facts, "Deployment", p.deployment_kind.replaceAll("_", " "));
   addFact(facts, "Tracked outstanding balance", money(p.balance_minor));
