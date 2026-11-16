@@ -1,0 +1,60 @@
+name: Phase 3 — demo website and safe licence lifecycle
+on:
+  push:
+    branches: [feat/phase3-demo-website]
+  pull_request:
+    paths:
+      - 'demo/**'
+      - 'sdk/**'
+      - 'scripts/demo-e2e.mjs'
+      - 'tests/demo.test.mjs'
+      - 'src/**'
+      - '.github/workflows/phase3-demo.yml'
+permissions:
+  contents: read
+jobs:
+  demo-lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: guard_demo
+          POSTGRES_PASSWORD: local-ci-test-password
+          POSTGRES_DB: nflake_guard_demo_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U guard_demo -d nflake_guard_demo_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://guard_demo:local-ci-test-password@127.0.0.1:5432/nflake_guard_demo_ci
+      CI: 'true'
+      DEMO_E2E_SYNTHETIC_FIXTURES: 'YES'
+      DEMO_HOST: 127.0.0.1
+      DEMO_ENABLED: 'YES'
+      # The integration script internally starts an isolated Guard server with
+      # the required synthetic test-only flags and a disposable DB. This is
+      # NEVER a production deployment nor a real payment verification result.
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Install packages
+        run: npm install --no-audit --no-fund
+      - name: Static checks
+        run: |
+          npm run check
+          node --check demo/server.mjs
+          node --check demo/gate.mjs
+          node --check demo/assets/site.js
+          node --check scripts/demo-e2e.mjs
+      - name: Run pure demo and existing Guard tests
+        run: npm test
+      - name: Create disposable Guard schema
+        run: npm run migrate
+      - name: End-to-end server-gated lifecycle
+        run: node scripts/demo-e2e.mjs
