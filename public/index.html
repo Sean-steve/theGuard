@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a1723">
+  <title>Nflake Guard — License Operations</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head><body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="brandmark">✳</span><span><strong>NFLAKE</strong><small>GUARD / CONTROL</small></span></div>
+    <div class="navlabel">WORKSPACE</div>
+    <nav aria-label="Main navigation">
+      <button class="nav active" data-page="overview"><span>◫</span> Overview</button>
+      <button class="nav" data-page="projects"><span>▦</span> Projects & licences</button>
+      <button class="nav" data-page="activity"><span>◷</span> Activity log</button>
+      <button class="nav" data-page="integrations"><span>⌘</span> Integrations</button>
+    </nav>
+    <div class="sidebottom"><div class="sidebadge">⬡ INTERNAL SYSTEM</div><p>Licence decisions for Nflake-controlled services. Client data stays untouched.</p></div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="crumb">NFLAKE TECHNOLOGIES <span>/</span> <strong>GUARD CONSOLE</strong></div>
+      <div class="top-actions"><span class="pill teal" id="modeTag">SAFETY FIRST</span><span class="avatar">NG</span></div>
+    </header>
+    <div class="pagebody">
+      <div class="security" id="securityBanner">Live restrictions are disabled until configured and explicitly approved.</div>
+      <section id="overview" class="page">
+        <div class="pageheading"><div><div class="eyebrow">OPERATIONS / OVERVIEW</div><h1>Licence intelligence<span class="dot">.</span></h1><p>Monitor licensing eligibility, verified debt, notices and holds across projects.</p></div><button class="primary goto-projects">+ Register project</button></div>
+        <div class="metrics">
+          <article class="metric"><span>Registered projects</span><strong id="total">0</strong><small>Under Nflake Guard</small></article>
+          <article class="metric"><span>Active licences</span><strong id="active">0</strong><small>Normal operations</small></article>
+          <article class="metric"><span>Grace periods</span><strong id="grace">0</strong><small>Restrictions not active</small></article>
+          <article class="metric"><span>Restricted licences</span><strong id="restricted">0</strong><small>Contractual entitlement only</small></article>
+        </div>
+        <div class="grid2">
+          <article class="panel"><div class="panelhead"><h2>Recent projects</h2><button class="textbutton goto-projects">View all →</button></div><div id="recentProjects" class="contentlist"><p class="muted">No projects registered yet.</p></div></article>
+          <article class="panel"><div class="panelhead"><h2>Enforcement safeguards</h2><span class="tag">ENABLED</span></div>
+            <div class="safetyitem"><span class="check">✓</span><div><strong>Contract evidence first</strong><small>Licensing restrictions need recorded written authorization.</small></div></div>
+            <div class="safetyitem"><span class="check">✓</span><div><strong>7-day grace period by default</strong><small>Clock starts only after a recorded notice.</small></div></div>
+            <div class="safetyitem"><span class="check">✓</span><div><strong>No client data restriction</strong><small>Only eligible Nflake-controlled features may be restricted.</small></div></div>
+            <div class="safetyitem"><span class="check">✓</span><div><strong>Sandbox stays non-enforcing</strong><small>Live financial verification requires a separate approval gate.</small></div></div>
+          </article>
+        </div>
+      </section>
+      <section id="projects" class="page" hidden>
+        <div class="pageheading"><div><div class="eyebrow">PROJECT REGISTRY</div><h1>Projects & licences<span class="dot">.</span></h1><p>One protected licence and tracked invoice reference per project in this MVP.</p></div></div>
+        <div class="grid2 alignstart">
+          <article class="panel"><div class="panelhead"><h2>Register a project</h2><span class="tag">STEP 01</span></div>
+            <form id="projectForm" class="form">
+              <label>Project name<input name="name" required maxlength="120" placeholder="e.g. Sample Marketing Website"></label>
+              <label>Client name<input name="client_name" required maxlength="120" placeholder="e.g. Example Client"></label>
+              <label>Domain / deployment hostname<input name="domain" required placeholder="example.test"></label>
+              <label>Invoice reference in Financial Document OS<input name="external_invoice_id" required maxlength="120" placeholder="e.g. INV-DEMO-001"></label>
+              <label>Deployment ownership<select name="deployment_kind"><option value="nflake_hosted">Nflake hosted</option><option value="nflake_backend">Nflake controlled backend</option><option value="client_hosted_static">Client hosted / static (never restrict)</option></select></label>
+              <button class="primary" type="submit">Register & generate project key →</button>
+            </form>
+            <div id="keyResult" class="keyresult" hidden><strong>Project key — shown once</strong><code id="keyText"></code><p>Store this only as a backend secret. It cannot be recovered here.</p></div>
+          </article>
+          <article class="panel"><div class="panelhead"><h2>Project registry</h2><span class="tag" id="projectCount">0 RECORDS</span></div><div id="projectList" class="contentlist"><p class="muted">No projects registered yet.</p></div></article>
+        </div>
+        <article class="panel detail" id="detail" hidden>
+          <div class="panelhead"><div><div class="eyebrow">LICENCE PROFILE</div><h2 id="detailName">Project details</h2></div><span id="detailStatus" class="status">ACTIVE</span></div>
+          <p id="detailReason" class="muted"></p>
+          <div class="detailgrid" id="detailFacts"></div>
+          <div class="divider"></div>
+          <h3>Contract & enforcement policy</h3>
+          <form id="policyForm" class="form policyform">
+            <label>Contract reference<input name="contract_reference" placeholder="Signed agreement / SOW reference"></label>
+            <label>Contract accepted (date)<input name="contract_date" type="date"></label>
+            <label>Allowed restriction<select name="restriction_scope"><option value="none">None</option><option value="licensed_marketing_site">Licensed marketing site</option><option value="premium_features">Premium features only</option></select></label>
+            <label>Grace period in days<input name="grace_days" type="number" min="1" max="90" value="7" required></label>
+            <label class="toggle"><input name="enforcement_enabled" type="checkbox"> Allow enforcement when all safeguards pass</label>
+            <button class="primary" type="submit">Save policy</button>
+          </form>
+          <div class="actions"><button id="recordNotice" class="secondary">Record written notice</button><button id="placeHold" class="secondary">Place payment dispute hold</button><button id="makePermanent" class="secondary">Issue permanent licence</button></div>
+          <p class="hint">Recording a notice requires external proof. No message is sent by Guard. Restrictions are not enabled in dry-run mode.</p>
+        </article>
+      </section>
+      <section id="activity" class="page" hidden>
+        <div class="pageheading"><div><div class="eyebrow">AUDIT / HISTORY</div><h1>Audit trail<span class="dot">.</span></h1><p>Project changes, notices, disputes and authenticated financial events.</p></div></div>
+        <article class="panel"><div id="activityList" class="contentlist"><p class="muted">No activity yet.</p></div></article>
+      </section>
+      <section id="integrations" class="page" hidden>
+        <div class="pageheading"><div><div class="eyebrow">CONNECTIVITY / API</div><h1>Integration centre<span class="dot">.</span></h1><p>Keep billing as the source of financial truth; Guard controls licensing decisions.</p></div></div>
+        <div class="grid2 alignstart">
+          <article class="panel"><div class="panelhead"><h2>Financial Document OS</h2><span class="tag">PENDING CONNECTION</span></div><p>Connector target: <strong>Sean-steve/ledger-flow-zen</strong></p><p class="muted">Local-first Node + PostgreSQL application. Phase 8 production release remains blocked. No live webhook is assumed.</p><div class="miniurl">POST /webhooks/financial</div><p class="hint">HMAC-SHA256 over timestamp and raw JSON, with event ID replay protection.</p></article>
+          <article class="panel"><div class="panelhead"><h2>Backend SDK contract</h2><span class="tag">SERVER ONLY</span></div><div class="miniurl">GET /v1/license/:projectId</div><p>Header: <code>x-guard-project-key</code></p><p class="muted">Never embed the project key in a public React bundle, GitHub Pages site, or client-provided source files.</p></article>
+        </div>
+        <article class="panel"><div class="panelhead"><h2>Release checklist</h2></div><p class="muted">Verified webhook connector, HTTPS, production identity/MFA, database backups, monitoring, legal approval and end-to-end tests are required before enabling real restrictions.</p></article>
+      </section>
+      <footer>© Nflake Technologies · Guard engineering preview · Financial truth remains in the invoicing system</footer>
+    </div>
+  </main>
+</div>
+<div class="loginOverlay" id="loginOverlay"><div class="loginCard"><div class="brand"><span class="brandmark">✳</span><span><strong>NFLAKE</strong><small>GUARD / CONTROL</small></span></div><div class="eyebrow">RESTRICTED ACCESS</div><h2>Sign in to Guard</h2><p>Enter your server-configured administrator token. It is kept only in this browser tab's memory.</p><form id="loginForm"><label>Administrator token<input type="password" autocomplete="off" id="adminToken" required placeholder="Paste your private token"></label><button class="primary" type="submit">Unlock console →</button><p class="error" id="loginError"></p></form></div></div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body></html>
