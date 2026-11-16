@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS financial_events (
   type TEXT NOT NULL,
   source TEXT NOT NULL,
   payload JSONB NOT NULL,
+  payload_hash TEXT NOT NULL,
   received_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE TABLE IF NOT EXISTS audit_logs (
