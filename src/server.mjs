@@ -99,10 +99,16 @@ async function handleFinancialWebhook(req, res) {
     if (event.project_id && event.project_id !== project.id) throw new HttpError(400, "Project reference mismatch");
     if (event.source === "sandbox" && project.payment_source === "verified")
       throw new HttpError(409, "Sandbox events cannot replace a verified financial state");
+    const digest = createHash("sha256").update(raw).digest("hex");
     const inserted = await q(tx,
-      "INSERT INTO financial_events(event_id,project_id,type,source,payload) VALUES ($1,$2,$3,$4,$5::jsonb) ON CONFLICT (event_id) DO NOTHING RETURNING event_id",
-      [eventId, project.id, event.type, event.source, raw]);
-    if (!inserted.length) return "duplicate";
+      "INSERT INTO financial_events(event_id,project_id,type,source,payload,payload_hash) VALUES ($1,$2,$3,$4,$5::jsonb,$6) ON CONFLICT (event_id) DO NOTHING RETURNING event_id",
+      [eventId, project.id, event.type, event.source, raw, digest]);
+    if (!inserted.length) {
+      const previous = await q(tx, "SELECT payload_hash,project_id FROM financial_events WHERE event_id=$1", [eventId]);
+      if (!previous.length || previous[0].payload_hash !== digest || previous[0].project_id !== project.id)
+        throw new HttpError(409, "Conflicting reuse of financial event ID");
+      return "duplicate";
+    }
     if (event.type === "invoice.overdue") {
       if (event.balance_minor === 0) throw new HttpError(400, "Overdue event cannot have zero balance");
       await q(tx, "UPDATE projects SET invoice_overdue=TRUE,balance_minor=$1,due_at=$2,payment_source=$3,updated_at=NOW() WHERE id=$4",
@@ -115,7 +121,7 @@ async function handleFinancialWebhook(req, res) {
       await q(tx, "UPDATE projects SET balance_minor=$1,invoice_overdue=$2,payment_source=$3,updated_at=NOW() WHERE id=$4",
         [event.balance_minor, event.balance_minor > 0, event.source, project.id]);
     } else if (event.type === "invoice.settled") {
-      await q(tx, "UPDATE projects SET balance_minor=0,invoice_overdue=FALSE,payment_source=$1,updated_at=NOW() WHERE id=$2",
+      await q(tx, "UPDATE projects SET balance_minor=0,invoice_overdue=FALSE,payment_source=$1,notice_sent_at=NULL,notice_evidence=NULL,updated_at=NOW() WHERE id=$2",
         [event.source, project.id]);
     } else if (event.type === "invoice.disputed") {
       await q(tx, "UPDATE projects SET hold_reason='Disputed invoice — administrator review required',updated_at=NOW() WHERE id=$1", [project.id]);
