@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS projects (
   balance_minor BIGINT NOT NULL DEFAULT 0 CHECK (balance_minor >= 0),
   invoice_overdue BOOLEAN NOT NULL DEFAULT FALSE,
   payment_source TEXT NOT NULL DEFAULT 'none' CHECK (payment_source IN ('none','sandbox','verified')),
+  financial_version BIGINT NOT NULL DEFAULT 0 CHECK (financial_version >= 0),
   hold_reason TEXT,
   permanent_at TIMESTAMPTZ,
   handover_reference TEXT,
