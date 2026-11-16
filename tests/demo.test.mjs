@@ -46,7 +46,7 @@ test("standalone demo server gates actual routes rather than merely hiding text 
     html = await response.text();
     assert.match(html, /is taking a pause/);
     assert.doesNotMatch(html, /Ideas that|Bloomfield Botanics|Thoughtful identities/);
-    assert.match(html, /Fictional website/);
+    assert.match(html, /fictional website/i);
     response = await fetch(base + "/portfolio");
     assert.doesNotMatch(await response.text(), /Bloomfield Botanics/);
     const json = await (await fetch(base + "/api/demo/status")).json();
