@@ -1,5 +1,19 @@
 # Financial Document OS → Nflake Guard connector contract
 
+## Phase 2 sandbox connector implemented in Financial Document OS (draft)
+
+The independent repository [ledger-flow-zen](https://github.com/Sean-steve/ledger-flow-zen)
+now has a **draft** branch `feat/guard-sandbox-connector` (based on its open Phase 8 security branch).
+It includes an additive local PostgreSQL outbox, owner-authorized invoice-to-Guard links,
+HMAC-signed **sandbox-only** delivery, a local optional reconciliation worker, an invoicing
+integration screen, and two-database GitHub Actions tests against the real Guard receiver.
+
+**This is not live integration**: FDOS financial balances remain canonical but do not prove
+independent bank settlement. Source is always `sandbox`, Guard is DRY RUN,
+and neither application is deployed to production. No client website is restricted.
+See `docs/phase-9/GUARD_SANDBOX_INTEGRATION.md` in the finance branch.
+
+
 **Source:** https://github.com/Sean-steve/ledger-flow-zen
 
 Confirmed 16 November 2026: main HEAD 6bb459e8a596c4fc19b2cb1c6d7e2182a80d4dbd (Phase 7 merged). Phase 8 security/recovery is OPEN/DRAFT PR #11 with a local-only certification candidate. Its backend deliberately rejects public production hosting. Live Safaricom settlement and live provider delivery are NOT certified; preview/sandbox M-Pesa receipts are test-only.
