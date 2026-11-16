@@ -31,6 +31,10 @@ export function parseFinancialEvent(rawBody, allowVerified = false) {
     throw new Error("Invoice reference required");
   if (!["sandbox", "verified"].includes(value.source)) throw new Error("Invalid payment source");
   if (value.source === "verified" && !allowVerified) throw new Error("Verified events are not activated");
+  if (value.source === "verified" && (!Number.isSafeInteger(value.sequence) || value.sequence < 1))
+    throw new Error("Verified financial event sequence required");
+  if (value.sequence != null && (!Number.isSafeInteger(value.sequence) || value.sequence < 1))
+    throw new Error("Invalid event sequence");
   if (value.project_id != null && (typeof value.project_id !== "string" ||
       !/^[0-9a-f-]{36}$/i.test(value.project_id))) throw new Error("Invalid project id");
   const balanceRequired = ["invoice.overdue", "invoice.balance_updated", "payment.reversed"].includes(value.type);
