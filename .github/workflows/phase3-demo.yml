@@ -15,7 +15,7 @@ permissions:
 jobs:
   demo-lifecycle:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 4
     services:
       postgres:
         image: postgres:16
@@ -57,4 +57,4 @@ jobs:
       - name: Create disposable Guard schema
         run: npm run migrate
       - name: End-to-end server-gated lifecycle
-        run: node scripts/demo-e2e.mjs
+        run: timeout --signal=TERM --kill-after=5s 60s node scripts/demo-e2e.mjs
