@@ -12,8 +12,9 @@ test("authentic webhook accepts a current timestamp and matching body", () => {
 });
 test("verified financial events require an independent feature gate", () => {
   assert.equal(parseFinancialEvent(body).source, "sandbox");
-  const verified = JSON.stringify({ type: "invoice.settled", source: "verified", external_invoice_id: "INV-1", balance_minor: 0 });
+  const verified = JSON.stringify({ type: "invoice.settled", source: "verified", external_invoice_id: "INV-1", balance_minor: 0, sequence: 1 });
   assert.throws(() => parseFinancialEvent(verified), /not activated/);
   assert.equal(parseFinancialEvent(verified, true).balance_minor, 0);
+  assert.throws(() => parseFinancialEvent(JSON.stringify({type:"invoice.settled", source:"verified", external_invoice_id:"INV-1", balance_minor:0}),true), /sequence/);
   assert.throws(() => parseFinancialEvent(JSON.stringify({type:"invoice.overdue", source:"sandbox", external_invoice_id:"INV", balance_minor:-1})), /balance_minor/);
 });
