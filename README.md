@@ -13,6 +13,7 @@ Nflake Guard records client project licences and can consume authenticated finan
 - Responsive Guard console: overview, project registration (one-time backend key), license policy, notices, dispute holds, permanent licences, and audit.
 - Licence states: ACTIVE / GRACE / RESTRICTED / PERMANENT. A RESTRICTED decision requires eligible Nflake-controlled hosting, accepted written contract, verified overdue balance, recorded written notice evidence, completed grace period, explicit operator opt-in, and global dry-run OFF.
 - Backend-only per-project key hashed at rest; GET /v1/license/:projectId provides advisory licensing decision.
+- Verified finance events must have strictly increasing sequence numbers to prevent stale overdue signals from overriding a later settlement.
 - HMAC-SHA256 events using timestamp, event ID and signed raw body; sandbox events cannot trigger real restrictions.
 - Automated unit tests and local PostgreSQL CI smoke checks.
 
