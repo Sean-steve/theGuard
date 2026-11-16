@@ -99,6 +99,8 @@ async function handleFinancialWebhook(req, res) {
     if (event.project_id && event.project_id !== project.id) throw new HttpError(400, "Project reference mismatch");
     if (event.source === "sandbox" && project.payment_source === "verified")
       throw new HttpError(409, "Sandbox events cannot replace a verified financial state");
+    if (event.source === "verified" && event.sequence <= Number(project.financial_version))
+      throw new HttpError(409, "Out-of-order verified financial event");
     const digest = createHash("sha256").update(raw).digest("hex");
     const inserted = await q(tx,
       "INSERT INTO financial_events(event_id,project_id,type,source,payload,payload_hash) VALUES ($1,$2,$3,$4,$5::jsonb,$6) ON CONFLICT (event_id) DO NOTHING RETURNING event_id",
@@ -127,7 +129,9 @@ async function handleFinancialWebhook(req, res) {
       await q(tx, "UPDATE projects SET hold_reason='Disputed invoice — administrator review required',updated_at=NOW() WHERE id=$1", [project.id]);
     }
     // dispute_resolved NEVER clears a hold without explicit operator review.
-    await addAudit(tx, project.id, "financial." + event.type, { event_id: eventId, source: event.source });
+    if (event.source === "verified")
+      await q(tx,"UPDATE projects SET financial_version=$1 WHERE id=$2",[event.sequence,project.id]);
+    await addAudit(tx, project.id, "financial." + event.type, { event_id: eventId, source: event.source, sequence: event.sequence || null });
     return "accepted";
   });
   reply(res, outcome === "accepted" ? 202 : 200, { status: outcome });
