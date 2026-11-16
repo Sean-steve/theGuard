@@ -56,6 +56,10 @@ Run `npm test` and `npm run check` for unit and syntax validation. CI also runs 
 - GET /v1/license/:id — project backend uses x-guard-project-key; no browser credentials.
 - POST /webhooks/financial — HMAC-protected finance event contract (see docs/FINANCIAL_CONNECTOR.md).
 
+## Server-side SDK
+
+Use §sdk/node.mjs§ from an Nflake-controlled backend only. Construct §new GuardClient({endpoint,projectId,projectKey})§ with a server secret, then call §await client.decision()§. The SDK validates project IDs, response expiry and permitted restriction scopes; network failures return UNKNOWN / restrict=false (no outage-caused suspension). Static GitHub Pages and fully transferred client source code cannot safely enforce secret-backed licensing.
+
 ## Restrictions and safety
 
 Guard never injects hidden disabling code. A Nflake-controlled backend may separately limit only *contractually authorized licensed functionality* based on a verified server-side entitlement decision. Never restrict or delete client data, exports, security access, or client-owned source. Never enforce on a static client-controlled deployment. Guard API outages must not become accidental suspensions: downstream servers should cache last-known ACTIVE decisions, time out quickly, and never restrict due solely to an unavailable Guard server.
