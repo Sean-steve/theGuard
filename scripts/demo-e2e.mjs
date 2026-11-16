@@ -32,7 +32,7 @@ const commonEnv = {
 const sql = postgres(process.env.DATABASE_URL, { max: 1, connect_timeout: 4, idle_timeout: 6 });
 const watchdog = setTimeout(() => {
   console.error("Phase 3 E2E exceeded 90 seconds — refusing to leave synthetic CI processes running");
-  for (const { child } of children) child.kill("SIGKILL");
+  for (const child of children) child.kill("SIGKILL");
   process.exit(1);
 }, 90_000);
 watchdog.unref();
@@ -238,7 +238,7 @@ try {
   process.exitCode = 1;
 } finally {
   // CI-only process isolation: stop both local servers and release child pipes.
-  for (const { child } of children) {
+  for (const child of children) {
     try { child.kill("SIGKILL"); } catch { /* already stopped */ }
     child.stdout?.destroy();
     child.stderr?.destroy();
