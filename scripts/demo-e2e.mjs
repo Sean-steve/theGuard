@@ -117,6 +117,7 @@ async function assertContent(expectedAvailable) {
   }
 }
 let projectId, invoiceId;
+let passed = false;
 try {
   await sql.unsafe("SET statement_timeout = 5000");
   const g = spawnServer("src/server.mjs", commonEnv);
@@ -231,10 +232,23 @@ try {
   await assertContent(true);
   console.log("PASS: Guard outage => NO accidental website restriction");
   console.log("PHASE 3 PASS — All tests ran in an isolated fictional local/CI environment.");
+  passed = true;
+} catch (error) {
+  console.error("PHASE 3 FAILED:", error);
+  process.exitCode = 1;
 } finally {
+  // CI-only process isolation: stop both local servers and release child pipes.
   for (const { child } of children) {
-    try { child.kill("SIGTERM"); } catch { /* already stopped */ }
+    try { child.kill("SIGKILL"); } catch { /* already stopped */ }
+    child.stdout?.destroy();
+    child.stderr?.destroy();
+    child.unref();
   }
-  await sql.end({ timeout: 5 });
+  // Avoid leaking a hanging test runner after assertions have completed.
+  await Promise.race([
+    sql.end({ timeout: 1 }).catch(() => {}),
+    new Promise(resolve => setTimeout(resolve, 2000))
+  ]);
   clearTimeout(watchdog);
+  process.exit(passed ? 0 : 1);
 }
